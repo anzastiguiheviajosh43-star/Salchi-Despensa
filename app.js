@@ -15,7 +15,7 @@
   // ---------- Guardado ----------
   const KEY = 'salchi.save.v1';
   const DEF = { name: '', datos: 'infantil', sound: true, vib: true, level: 1, stars: {}, best: {}, huesitos: 60,
-    boost: { undo: 3, hint: 3, shuffle: 2, slot: 1 }, found: {}, daily: { last: '', streak: 0, lastPlay: '' }, seen: {}, cur: null };
+    boost: { undo: 3, hint: 3, shuffle: 2, slot: 1 }, zoom: 1, found: {}, daily: { last: '', streak: 0, lastPlay: '' }, seen: {}, cur: null };
   let S = load();
   function load() {
     try {
@@ -137,6 +137,17 @@
     pump: (p) => `<rect x="17" y="3" width="6" height="9" rx="1" fill="#f2f2f2"/><rect x="22" y="4" width="9" height="3" rx="1.5" fill="#f2f2f2"/><rect x="14" y="11" width="12" height="5" rx="1.5" fill="${p.c2}"/><rect x="8" y="16" width="24" height="38" rx="7" fill="${p.c}"/><rect x="8" y="21" width="24" height="13" fill="#fff" opacity=".93"/><text x="20" y="27.4" ${T} font-size="5.1" fill="${p.c2}">${p.tag}</text><path d="M20 28.6 q-2.4 2 0 4 q2.4 -2 0 -4 Z" fill="${p.c2}"/>${face(44.5)}${gl(10.5, 18, 34)}<rect x="27" y="16" width="5" height="38" rx="2.5" fill="#000" opacity=".12"/>`,
     jug: (p) => `<rect x="21" y="3" width="9" height="6" rx="1.5" fill="${p.c2}"/><path d="M8 20 Q8 12 15 12 H21 V9 H30 V12 Q34 13 34 20 V50 Q34 54 30 54 H12 Q8 54 8 50 Z" fill="${p.c}"/><ellipse cx="27.5" cy="19.5" rx="2.4" ry="4.2" fill="#000" opacity=".25"/><rect x="8" y="26" width="26" height="11" fill="#fff"/><text x="21" y="33.6" ${T} font-size="6.2" fill="${p.c2}">${p.tag}</text>${face(46, 21)}${gl(10.5, 16, 35)}<rect x="29" y="14" width="5" height="40" rx="2.5" fill="#000" opacity=".12"/>`,
     roll: (p) => `<rect x="7" y="13" width="26" height="41" rx="4" fill="#fff"/><rect x="7" y="22" width="26" height="11" fill="${p.c}"/><text x="20" y="29.8" ${T} font-size="5.4" fill="#fff">${p.tag}</text><ellipse cx="20" cy="13" rx="13" ry="4" fill="#efe9e0"/><ellipse cx="20" cy="13" rx="4" ry="1.5" fill="#b3a28c"/>${face(44)}<rect x="28" y="13" width="5" height="41" fill="#000" opacity=".07"/>`,
+    eggs: (p, tc) => `<ellipse cx="11" cy="27" rx="5.6" ry="7" fill="${p.c3}"/><ellipse cx="20" cy="24.5" rx="5.6" ry="7" fill="${p.c3}"/><ellipse cx="29" cy="27" rx="5.6" ry="7" fill="${p.c3}"/><ellipse cx="18.4" cy="21.5" rx="1.4" ry="2.2" fill="#fff"/><path d="M4 30 Q8 26 12 30 Q16 26 20 30 Q24 26 28 30 Q32 26 36 30 V51 Q36 54 33 54 H7 Q4 54 4 51 Z" fill="${p.c}"/><text x="20" y="39.4" ${T} font-size="5.8" fill="${p.c2}">${p.tag}</text>${face(47)}<rect x="31" y="30" width="5" height="24" rx="2" fill="#000" opacity=".1"/>`,
+    wedge: (p) => `<path d="M4 54 V31 L36 19 V54 Z" fill="${p.c}"/><path d="M4 31 L36 19 L36 24.5 L4 35 Z" fill="${p.c2}" opacity=".45"/><circle cx="10" cy="42" r="2.2" fill="${p.c2}" opacity=".55"/><circle cx="31" cy="30" r="1.8" fill="${p.c2}" opacity=".55"/><circle cx="32" cy="50" r="2" fill="${p.c2}" opacity=".55"/><circle cx="9" cy="51" r="1.3" fill="${p.c2}" opacity=".55"/>${face(44, 21)}<rect x="31" y="20" width="5" height="34" fill="#000" opacity=".1"/>`,
+    tub: (p, tc) => `<rect x="4" y="25" width="32" height="7" rx="3.5" fill="${p.c2}"/><path d="M6 31 H34 L32 54 H8 Z" fill="${p.c}"/><rect x="7" y="34" width="26" height="8" fill="#fff" opacity=".9"/><text x="20" y="40.3" ${T} font-size="5" fill="${tc}">${p.tag}</text>${face(48.5)}<path d="M8.5 32 L10.2 52 H12.6 L11 32 Z" fill="#fff" opacity=".45"/><path d="M29 31 H34 L32 54 H28 Z" fill="#000" opacity=".1"/>`,
+    tin: (p) => `<rect x="4" y="34" width="32" height="20" rx="5" fill="${p.c}"/><ellipse cx="20" cy="34.5" rx="16" ry="3.6" fill="#dcdce4"/><ellipse cx="20" cy="34.5" rx="11.5" ry="2.1" fill="#b9b9c4"/><rect x="4" y="38.5" width="32" height="7" fill="#fff"/><text x="20" y="44.1" ${T} font-size="5.4" fill="${p.c2}">${p.tag}</text>${face(50)}<rect x="6.5" y="46" width="3" height="6" rx="1.5" fill="#fff" opacity=".4"/><rect x="31" y="35" width="5" height="19" rx="2.5" fill="#000" opacity=".13"/>`,
+    sack: (p) => `<path d="M11.5 16 L13 5 L16.5 10 L20 3.5 L23.5 10 L27 5 L28.5 16 Z" fill="${p.c}"/><path d="M10 16 Q20 12 30 16 L34 50 Q34 54 30 54 H10 Q6 54 6 50 Z" fill="${p.c}"/><rect x="10" y="13.5" width="20" height="4" rx="2" fill="${p.c2}"/><rect x="9" y="23" width="22" height="13" rx="3.5" fill="#fff" opacity=".95" stroke="${p.c2}" stroke-width="1"/><text x="20" y="31.8" ${T} font-size="5.2" fill="${p.c2}">${p.tag}</text>${face(45)}<path d="M9 20 Q7.5 35 8.5 51 H11.5 Q10.5 35 12 20 Z" fill="#fff" opacity=".3"/><path d="M29 18 L34 50 Q34 54 30 54 H29.5 Z" fill="#000" opacity=".1"/>`,
+    shaker: (p) => `<path d="M12 5 H28 Q30 5 30 7 V13 H10 V7 Q10 5 12 5 Z" fill="#dcdce4"/><circle cx="16" cy="8.5" r=".9" fill="#888"/><circle cx="20" cy="8" r=".9" fill="#888"/><circle cx="24" cy="8.5" r=".9" fill="#888"/><rect x="9" y="12.5" width="22" height="41.5" rx="5" fill="${p.c}"/><rect x="9" y="21" width="22" height="12" fill="#fff"/><text x="20" y="29.6" ${T} font-size="6.4" fill="${p.c2}">${p.tag}</text>${face(44)}${gl(11.5, 14, 37)}<rect x="26" y="12.5" width="5" height="41.5" rx="2.5" fill="#000" opacity=".12"/>`,
+    oil: (p) => `<rect x="16.5" y="2" width="7" height="5" rx="1.2" fill="${p.c2}"/><path d="M17 7 H23 L24.5 14 H15.5 Z" fill="${p.c}"/><path d="M14 14 H26 Q30.5 16 30.5 22 V50 Q30.5 54 26.5 54 H13.5 Q9.5 54 9.5 50 V22 Q9.5 16 14 14 Z" fill="${p.c}"/><rect x="9.5" y="25" width="21" height="12" fill="#fff"/><text x="20" y="33" ${T} font-size="4.9" fill="${p.c2}">${p.tag}</text><path d="M16 34.5 q4 -3 8 0" fill="none" stroke="${p.c2}" stroke-width=".8"/>${face(45.5)}${gl(11.5, 17, 34)}<rect x="25.5" y="15" width="5" height="39" rx="2.5" fill="#000" opacity=".12"/>`,
+    spray: (p) => `<path d="M13 4 H27 L29 9 H34 Q35 9 35 10 V11 Q35 12 34 12 H26 L25 15 H15 Z" fill="${p.c2}"/><rect x="15" y="15" width="9" height="4" fill="#eceaf2"/><path d="M13 19 H27 Q32 22 32 30 V50 Q32 54 28 54 H12 Q8 54 8 50 V30 Q8 22 13 19 Z" fill="${p.c}"/><rect x="8" y="27" width="24" height="11" fill="#fff" opacity=".93"/><text x="20" y="34.6" ${T} font-size="5" fill="${p.c2}">${p.tag}</text>${face(46)}${gl(10.5, 24, 27)}<path d="M27 20 Q32 22 32 30 V50 Q32 54 28 54 H27 Z" fill="#000" opacity=".12"/>`,
+    tube: (p, tc) => `<rect x="9" y="6" width="22" height="4.5" rx="1" fill="#e6e6ee"/><path d="M10 10 H30 L27.5 45 H12.5 Z" fill="${p.c}"/><path d="M10.5 16 H29.6 L29.2 21 H10.8 Z" fill="${p.c2}"/><path d="M11 25 H29 L28.6 31 H11.4 Z" fill="${p.c3}"/><text x="20" y="19.9" ${T} font-size="4" fill="#fff">${p.tag}</text>${face(37)}<rect x="14" y="45" width="12" height="9" rx="2.5" fill="${p.c2}"/><path d="M12 11 L13.4 43 H15.6 L14.6 11 Z" fill="#fff" opacity=".4"/>`,
+    sponge: (p) => `<rect x="5" y="31" width="30" height="23" rx="5" fill="${p.c}"/><rect x="5" y="31" width="30" height="8" rx="4" fill="${p.c2}"/><rect x="5" y="36" width="30" height="3" fill="${p.c2}"/><circle cx="10" cy="51" r="1.2" fill="#000" opacity=".12"/><circle cx="31" cy="44" r="1.4" fill="#000" opacity=".12"/><circle cx="29" cy="51" r="1" fill="#000" opacity=".12"/><circle cx="9" cy="43" r="1" fill="#000" opacity=".12"/>${face(46)}<rect x="30" y="31" width="5" height="23" rx="2.5" fill="#000" opacity=".1"/>`,
+    net: (p) => `<defs><clipPath id="netc"><path d="M5 41 Q4 21 20 19 Q36 21 35 41 Q36 54 20 54.5 Q4 54 5 41 Z"/></clipPath></defs><path d="M17 20 L20 11 L23 20" fill="none" stroke="${p.c2}" stroke-width="1.8" stroke-linecap="round"/><rect x="15" y="9" width="10" height="4" rx="2" fill="${p.c2}"/><circle cx="12.5" cy="45" r="8.5" fill="${p.c}"/><circle cx="27.5" cy="45" r="8.5" fill="${p.c}"/><circle cx="20" cy="30" r="9.5" fill="${p.c}"/><path d="M20 20.5 q2.5 -4.5 6 -4 q-1.5 4 -6 4 Z" fill="${p.c3}"/><circle cx="9.5" cy="41.5" r="2" fill="#fff" opacity=".4"/><circle cx="24.5" cy="41.5" r="2" fill="#fff" opacity=".4"/><circle cx="16.5" cy="26" r="2.3" fill="#fff" opacity=".45"/><g clip-path="url(#netc)" fill="none" stroke="${p.c2}" stroke-width=".9" opacity=".7"><path d="M-4 22 L36 58 M-4 32 L26 60 M6 14 L46 50 M16 12 L46 40 M44 22 L4 58 M44 32 L14 60 M34 14 L-6 50 M24 12 L-6 40"/></g>${face(31)}`,
     gift: () => `<rect x="5" y="22" width="30" height="32" rx="4" fill="#8a52ec"/><rect x="3" y="16" width="34" height="9" rx="3" fill="#a678ff"/><rect x="17" y="16" width="6" height="38" fill="#ffcb45"/><path d="M20 16 C14 5 5 9 12 15 Z M20 16 C26 5 35 9 28 15 Z" fill="#ffcb45"/>${face(40)}${gl(7, 25, 26)}<circle cx="9.5" cy="31" r="1.2" fill="#fff"/><circle cx="31" cy="27" r="1" fill="#fff"/><circle cx="30.5" cy="47" r="1.3" fill="#fff"/>`
   };
   const SVGC = {};
@@ -440,6 +451,7 @@
   //  PARTIDA
   // =====================================================================
   let levelNew = [];
+  let tapPend = null;
   let G = null, sel = null, busy = false, drag = null, hintData = null, idleT = null, tutoEl = null, peekMood = 'happy', tipCount = 0, onResize = null;
   const BASKET = () => G.comps.length - 1;
 
@@ -465,7 +477,14 @@
         </div>
       </header>
       <div class="metas" id="metas"></div>
-      <div class="board-wrap" id="bw"><div class="shelf" id="shelf"></div><div class="basket" id="basket"></div></div>
+      <div class="stage">
+        <div class="zoomc" role="group" aria-label="Zoom">
+          <button data-act="zout" aria-label="Alejar"><svg viewBox="0 0 24 24" ${ST} stroke-width="3"><path d="M6 12h12"/></svg></button>
+          <span id="zl">100%</span>
+          <button data-act="zin" aria-label="Acercar"><svg viewBox="0 0 24 24" ${ST} stroke-width="3"><path d="M6 12h12M12 6v12"/></svg></button>
+        </div>
+        <div class="board-wrap" id="bw"><div class="shelf" id="shelf"></div><div class="basket" id="basket"></div></div>
+      </div>
       <nav class="boosters" id="boosters" aria-label="Ayudas"></nav>
     </div>`;
     const shelf = $('#shelf');
@@ -548,6 +567,18 @@
     }
     game.classList.toggle('tight', tight);
     ih = Math.max(ih, 26); iw = ih / 1.4;
+    const z = S.zoom || 1;
+    bw.classList.toggle('zoomed', z > 1);
+    const zl = $('#zl'); if (zl) zl.textContent = Math.round(z * 100) + '%';
+    if (z > 1) {
+      ih *= z; iw = ih / 1.4;
+      const cub = 3 * iw + 12;
+      $('#shelf').style.width = (3 * cub + 14 + 18).toFixed(0) + 'px';
+      $('#basket').style.width = (cub + 24).toFixed(0) + 'px';
+    } else {
+      $('#shelf').style.width = '';
+      $('#basket').style.width = '';
+    }
     const r = $('.game').style;
     r.setProperty('--iw', iw.toFixed(1) + 'px');
     r.setProperty('--ih', ih.toFixed(1) + 'px');
@@ -621,9 +652,9 @@
       else if (m.id === 'gift') ic = I.gift;
       else if (m.id === 'streak') ic = I.flame;
       else ic = I.noshuf;
-      const prog = m.bonus ? (done ? 'Bonus' : 'Perdido') : (done ? '¡Listo!' : v + ' / ' + m.target);
-      const SHORT = { lac: 'Lácteos', beb: 'Bebidas', des: 'Despensa', lim: 'Limpieza' };
-      const label = m.bonus ? 'Sin Mezclar' : m.id === 'cat' ? 'Tríos de ' + SHORT[m.cat] : m.id === 'gift' ? 'Cajas sorpresa' : 'Racha de ' + m.target;
+      const prog = m.bonus ? (done ? 'Bonus' : 'Perdido') : (done ? '¡Listo!' : v + '/' + m.target + (m.id === 'cat' ? ' tríos' : ''));
+      const SHORT = { lac: 'Lácteos', beb: 'Bebidas', des: 'Despensa', lim: 'Limpieza', fru: 'Frutas' };
+      const label = m.bonus ? 'Sin Mezclar' : m.id === 'cat' ? SHORT[m.cat] : m.id === 'gift' ? 'Sorpresas' : 'Racha';
       return `<div class="meta ${done ? 'done' : ''} ${m.bonus ? 'bonus' : ''}"><span class="mi">${ic}</span><span class="mt"><span>${esc(label)}</span><b>${prog}</b></span></div>`;
     }).join('');
   }
@@ -659,8 +690,31 @@
       return;
     }
     const at = compAt(e.clientX, e.clientY);
-    if (at && sel) { e.preventDefault(); tryMove(sel, { c: at.c, s: at.s }); return; }
-    if (at && !E.interactable(G, at.c)) sealedNotice(at.c, at.el);
+    if (at) tapPend = { x: e.clientX, y: e.clientY, id: e.pointerId, at };
+  }
+  function updateTarget(x, y) {
+    const ih = parseFloat(getComputedStyle($('.game')).getPropertyValue('--ih')) || 50;
+    const at = compAt(x, y - ih * 0.45) || compAt(x, y);
+    $$('.cub.ok,.cub.bad').forEach((el) => el.classList.remove('ok', 'bad'));
+    drag.target = null;
+    if (at && at.c !== drag.c) {
+      const ok = E.interactable(G, at.c) && G.comps[at.c].front.indexOf(null) >= 0;
+      at.el.classList.add(ok ? 'ok' : 'bad');
+      if (ok) drag.target = at;
+    }
+  }
+  function autoScroll() {
+    if (!drag || !drag.moved) return;
+    const bw = $('#bw'); if (!bw) return;
+    const r = bw.getBoundingClientRect(), m = 46;
+    let dx = 0, dy = 0;
+    if (drag.py < r.top + m) dy = -9; else if (drag.py > r.bottom - m) dy = 9;
+    if (drag.px < r.left + m) dx = -9; else if (drag.px > r.right - m) dx = 9;
+    if (dx || dy) {
+      const l = bw.scrollLeft, t = bw.scrollTop;
+      bw.scrollBy(dx, dy);
+      if (bw.scrollLeft !== l || bw.scrollTop !== t) updateTarget(drag.px, drag.py);
+    }
   }
   function onMove(e) {
     if (!drag || e.pointerId !== drag.id) return;
@@ -677,26 +731,29 @@
       document.body.appendChild(gh);
       drag.ghost = gh;
       drag.el.classList.add('lift');
+      drag.timer = setInterval(autoScroll, 16);
       SFX.pick(); vib(8);
     }
     if (drag.moved) {
       e.preventDefault();
       drag.ghost.style.left = e.clientX + 'px';
       drag.ghost.style.top = e.clientY + 'px';
-      const ih = parseFloat(getComputedStyle($('.game')).getPropertyValue('--ih')) || 50;
-      const at = compAt(e.clientX, e.clientY - ih * 0.45) || compAt(e.clientX, e.clientY);
-      $$('.cub.ok,.cub.bad').forEach((x) => x.classList.remove('ok', 'bad'));
-      drag.target = null;
-      if (at && at.c !== drag.c) {
-        const ok = E.interactable(G, at.c) && G.comps[at.c].front.indexOf(null) >= 0;
-        at.el.classList.add(ok ? 'ok' : 'bad');
-        if (ok) drag.target = at;
-      }
+      drag.px = e.clientX; drag.py = e.clientY;
+      updateTarget(e.clientX, e.clientY);
     }
   }
   function onUp(e) {
+    if (tapPend && e.pointerId === tapPend.id) {
+      const t = tapPend; tapPend = null;
+      if (Math.hypot(e.clientX - t.x, e.clientY - t.y) < 12 && G && !busy) {
+        if (sel) tryMove(sel, { c: t.at.c, s: t.at.s });
+        else if (!E.interactable(G, t.at.c)) sealedNotice(t.at.c, t.at.el);
+      }
+      return;
+    }
     if (!drag || e.pointerId !== drag.id) return;
     const d = drag; drag = null;
+    clearInterval(d.timer);
     clearGhost();
     $$('.cub.ok,.cub.bad').forEach((x) => x.classList.remove('ok', 'bad'));
     if (d.moved) {
@@ -713,7 +770,7 @@
     d.el.classList.add('sel', 'happy');
     SFX.pick(); vib(6);
   }
-  function onCancel() { if (!drag) return; if (drag.el) drag.el.classList.remove('lift'); drag = null; clearGhost(); $$('.cub.ok,.cub.bad').forEach((x) => x.classList.remove('ok', 'bad')); }
+  function onCancel() { tapPend = null; if (!drag) return; clearInterval(drag.timer); if (drag.el) drag.el.classList.remove('lift'); drag = null; clearGhost(); $$('.cub.ok,.cub.bad').forEach((x) => x.classList.remove('ok', 'bad')); }
   function clearGhost() { $$('.ghost').forEach((g) => g.remove()); }
 
   const seenSealed = {};
@@ -850,6 +907,23 @@
     }
   }
   ['undo', 'hint', 'shuffle', 'slot'].forEach((k) => { ACTS['b_' + k] = () => useBoost(k); });
+  const ZOOMS = [1, 1.25, 1.5, 1.8];
+  function setZoom(dir) {
+    if (!G || busy) return;
+    const i = Math.max(0, ZOOMS.indexOf(S.zoom || 1));
+    const ni = Math.min(ZOOMS.length - 1, Math.max(0, i + dir));
+    if (ni === i) { SFX.bad(); return; }
+    const bw = $('#bw');
+    const cx = (bw.scrollLeft + bw.clientWidth / 2) / Math.max(1, bw.scrollWidth);
+    const cy = (bw.scrollTop + bw.clientHeight / 2) / Math.max(1, bw.scrollHeight);
+    S.zoom = ZOOMS[ni]; save();
+    layout(); renderBoard(G.comps);
+    bw.scrollLeft = cx * bw.scrollWidth - bw.clientWidth / 2;
+    bw.scrollTop = cy * bw.scrollHeight - bw.clientHeight / 2;
+    if (S.zoom > 1 && !S.seen.zoom) { S.seen.zoom = true; save(); toast('¡Zoom!', 'Desliza el dedo sobre la madera para moverte por el estante.', { ms: 4000 }); }
+  }
+  ACTS.zin = () => setZoom(1);
+  ACTS.zout = () => setZoom(-1);
 
   // ---------- Tutorial (nivel 1) ----------
   function showTuto() {

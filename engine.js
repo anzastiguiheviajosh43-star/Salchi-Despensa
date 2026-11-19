@@ -62,14 +62,107 @@
     cacahuate:  { name: 'Crema de cacahuate', tag: 'CREMA', shape: 'jar', c: '#ec7d34', c2: '#8f3a0c', c3: '#ffffff', cat: 'des', anim: 'bounce', where: 'Alacena',
       i: 'La crema de cacahuate se hace con cacahuates molidos.',
       g: 'Si el aceite se separa arriba es normal: solo revuélvela. Hay personas alérgicas al cacahuate.' },
+
+    // ---- Nuevos ----
+    huevo:      { name: 'Huevo', tag: 'HUEVO', shape: 'eggs', c: '#d9b98c', c2: '#8a5a1c', c3: '#fff6e6', cat: 'lac', anim: 'bounce', where: 'Refrigerador, en su caja',
+      i: 'El huevo tiene proteína que te ayuda a crecer fuerte.',
+      g: 'Guárdalo en su caja dentro del refri y lávalo justo antes de usarlo, no antes de guardarlo.' },
+    queso:      { name: 'Queso', tag: '', shape: 'wedge', c: '#ffd45c', c2: '#e0a81a', c3: '#ffffff', cat: 'lac', anim: 'wobble', where: 'Refrigerador, bien envuelto',
+      i: 'El queso se hace con leche.',
+      g: 'Envuélvelo bien para que no se reseque ni agarre el olor de otros alimentos del refri.' },
+    mantequilla:{ name: 'Mantequilla', tag: 'MANTEQ.', shape: 'tub', c: '#fff0a8', c2: '#d99a00', c3: '#ffffff', tc: '#8a5a00', cat: 'lac', anim: 'idle', where: 'Refrigerador',
+      i: 'La mantequilla se hace batiendo la crema de la leche.',
+      g: 'Tiene mucha grasa saturada: úsala en porciones pequeñas.' },
+    crema:      { name: 'Crema', tag: 'CREMA', shape: 'tub', c: '#f4f4f8', c2: '#2f6fd6', c3: '#ffffff', tc: '#1a4596', cat: 'lac', anim: 'bounce', where: 'Refrigerador',
+      i: 'La crema le da un toque rico a los tacos y las enchiladas.',
+      g: 'Ya abierta, ciérrala bien y úsala en pocos días.' },
+    gelatina:   { name: 'Gelatina', tag: 'GELATINA', shape: 'cup', c: '#ff6b8b', c2: '#c2185b', c3: '#ffd1dc', cat: 'lac', anim: 'wobble', where: 'Refrigerador (ya preparada)',
+      i: 'La gelatina necesita frío para quedar firme y tiemblorosa.',
+      g: 'Ya preparada va al refri; la de polvo se guarda en la alacena.' },
+    te:         { name: 'Té', tag: 'TÉ', shape: 'box', c: '#5fb3a1', c2: '#1f6b5c', c3: '#c8f0dc', cat: 'beb', anim: 'idle', where: 'Alacena, caja cerrada',
+      i: 'El té se hace con hojitas secas en agua calientita.',
+      g: 'Guárdalo cerrado y lejos de olores fuertes: las hojas absorben aromas.' },
+    chocolate:  { name: 'Chocolate', tag: 'CHOCO', shape: 'can', c: '#8a4b2a', c2: '#5a2c12', c3: '#ffffff', cat: 'beb', anim: 'sway', where: 'Alacena, lugar fresco',
+      i: 'El chocolate de mesa se disuelve en leche o agua caliente.',
+      g: 'Con calor le sale una capita blanca: es la grasa del cacao y no es peligrosa.' },
+    jamaica:    { name: 'Flor de jamaica', tag: 'Jamaica', shape: 'bag', c: '#b3264e', c2: '#6e0f2c', c3: '#ff7da0', cat: 'beb', anim: 'sway', where: 'Alacena, bolsa cerrada',
+      i: 'El agua de jamaica se hace con flores secas.',
+      g: 'Guarda la flor seca en bolsa cerrada y prepara el agua con poca azúcar.' },
+    mineral:    { name: 'Agua mineral', tag: 'MINERAL', shape: 'bottle', c: '#9fe3c9', c2: '#11795a', c3: '#ffffff', cat: 'beb', anim: 'shake', where: 'Lugar fresco, sin sol',
+      i: 'El agua mineral tiene burbujitas de gas.',
+      g: 'Algunas traen sodio: revisa la etiqueta si cuidas tu presión.' },
+    arroz:      { name: 'Arroz', tag: 'ARROZ', shape: 'sack', c: '#f3ead6', c2: '#2f6fd6', c3: '#ffffff', cat: 'des', anim: 'idle', where: 'Alacena, frasco cerrado',
+      i: 'El arroz crece en campos llenos de agua.',
+      g: 'Crudo dura mucho en frasco cerrado; ya cocido va al refri y se come en pocos días.' },
+    frijol:     { name: 'Frijol', tag: 'FRIJOL', shape: 'sack', c: '#6b3a2a', c2: '#e8742c', c3: '#ffffff', cat: 'des', anim: 'wobble', where: 'Alacena',
+      i: 'Los frijoles tienen fibra y proteína.',
+      g: 'Frijol con tortilla de maíz se complementan y dan una proteína más completa.' },
+    harina:     { name: 'Harina', tag: 'HARINA', shape: 'sack', c: '#ffffff', c2: '#d94f7c', c3: '#ffffff', cat: 'des', anim: 'idle', where: 'Alacena, bien cerrada',
+      i: 'La harina se usa para hacer pan y hot cakes.',
+      g: 'Ciérrala bien para que no le entren gorgojos ni humedad.' },
+    azucar:     { name: 'Azúcar', tag: 'AZÚCAR', shape: 'sack', c: '#e9f1ff', c2: '#3a84e6', c3: '#ffffff', cat: 'des', anim: 'bounce', where: 'Alacena',
+      i: 'El azúcar es rica, pero poquita.',
+      g: 'La OMS sugiere que el azúcar añadida sea menos del 10% de lo que comes al día.' },
+    sal:        { name: 'Sal', tag: 'SAL', shape: 'shaker', c: '#3a84e6', c2: '#154c99', c3: '#ffffff', cat: 'des', anim: 'shake', where: 'Alacena, lugar seco',
+      i: 'Un poquito de sal hace la comida más sabrosa.',
+      g: 'Mucha sal sube la presión: prueba la comida antes de agregarle más.' },
+    aceite:     { name: 'Aceite', tag: 'ACEITE', shape: 'oil', c: '#f6c637', c2: '#2e7d32', c3: '#ffffff', cat: 'des', anim: 'sway', where: 'Alacena, lejos de la estufa',
+      i: 'El aceite se usa para cocinar y freír.',
+      g: 'Guárdalo lejos del calor y la luz para que no se enrancie, y nunca lo tires al fregadero.' },
+    atun:       { name: 'Atún', tag: 'ATÚN', shape: 'tin', c: '#2f6fd6', c2: '#1a4596', c3: '#ffffff', cat: 'des', anim: 'bounce', where: 'Alacena; abierto, al refri',
+      i: 'El atún es un pescado que vive en el mar.',
+      g: 'Ya abierto, pásalo a un recipiente con tapa y guárdalo en el refri.' },
+    pasta:      { name: 'Sopa de pasta', tag: 'PASTA', shape: 'box', c: '#ffcb45', c2: '#c2261b', c3: '#fff1c2', tc: '#8a1c12', cat: 'des', anim: 'wobble', where: 'Alacena',
+      i: 'La sopa de pasta se hace con harina de trigo.',
+      g: 'Seca dura mucho; ya cocida va al refri en recipiente con tapa.' },
+    refritos:   { name: 'Frijoles refritos', tag: 'REFRITOS', shape: 'can', c: '#7a4426', c2: '#4a2410', c3: '#ffffff', cat: 'des', anim: 'idle', where: 'Alacena; abiertos, al refri',
+      i: 'Los frijoles refritos se machacan y se fríen.',
+      g: 'No guardes comida en la lata abierta: pásala a otro recipiente.' },
+    chiles:     { name: 'Chiles en vinagre', tag: 'CHILES', shape: 'can', c: '#2e9a3e', c2: '#1b5e1a', c3: '#ffffff', cat: 'des', anim: 'shake', where: 'Alacena; abiertos, al refri',
+      i: 'Los chiles en vinagre pican: ¡con cuidado!',
+      g: 'Ya abiertos, mejor en frasco de vidrio con tapa dentro del refri.' },
+    mayonesa:   { name: 'Mayonesa', tag: 'MAYO', shape: 'jar', c: '#fff6d6', c2: '#2f6fd6', c3: '#ffffff', cat: 'des', anim: 'bounce', where: 'Refrigerador (ya abierta)',
+      i: 'La mayonesa se hace con huevo y aceite.',
+      g: 'Abierta va al refri; no la dejes mucho rato afuera en días de calor.' },
+    mermelada:  { name: 'Mermelada', tag: 'FRESA', shape: 'jar', c: '#d6284a', c2: '#7a0f24', c3: '#ffffff', cat: 'des', anim: 'wobble', where: 'Alacena; abierta, al refri',
+      i: 'La mermelada se hace con fruta cocida y azúcar.',
+      g: 'Sírvela con cuchara limpia: así dura más sin que le salgan hongos.' },
+    tostadas:   { name: 'Tostadas', tag: 'Tostadas', shape: 'bag', c: '#f2a93b', c2: '#a8560a', c3: '#ffe08a', cat: 'des', anim: 'wobble', where: 'Alacena, bolsa cerrada',
+      i: 'Las tostadas son tortillas doraditas y crujientes.',
+      g: 'Ciérralas bien: con la humedad pierden lo crujiente.' },
+    cloro:      { name: 'Cloro', tag: 'CLORO', shape: 'jug', c: '#f4f6fb', c2: '#2f6fd6', c3: '#ffffff', cat: 'lim', anim: 'idle', where: 'Área de lavado, lejos de comida',
+      i: 'El cloro es solo para limpiar, ¡nunca se toma!',
+      g: 'Nunca lo mezcles con otros limpiadores: puede soltar gases tóxicos.' },
+    limpiador:  { name: 'Limpiador', tag: 'LIMPIA', shape: 'spray', c: '#b48cf2', c2: '#5b2bb5', c3: '#ffffff', cat: 'lim', anim: 'shake', where: 'Área de limpieza',
+      i: 'El limpiador deja todo brillante y oloroso.',
+      g: 'Úsalo con la ventana abierta y guárdalo con la tapa bien cerrada.' },
+    pastadental:{ name: 'Pasta de dientes', tag: 'DIENTES', shape: 'tube', c: '#ffffff', c2: '#e53935', c3: '#4a93e6', tc: '#c2261b', cat: 'lim', anim: 'bounce', where: 'Baño',
+      i: 'Cepíllate los dientes después de comer.',
+      g: 'Para peques basta con una cantidad del tamaño de un chícharo.' },
+    esponja:    { name: 'Esponja', tag: '', shape: 'sponge', c: '#ffd84a', c2: '#3fae49', c3: '#ffffff', cat: 'lim', anim: 'bounce', where: 'Junto al fregadero, que se seque',
+      i: 'La esponja ayuda a lavar los trastes.',
+      g: 'Déjala secar entre usos y cámbiala seguido: junta muchas bacterias.' },
+    servilletas:{ name: 'Servilletas', tag: 'SERVILL.', shape: 'roll', c: '#ff8fb1', c2: '#d94f7c', c3: '#ffffff', cat: 'lim', anim: 'sway', where: 'Lugar seco',
+      i: 'Las servilletas ayudan a comer limpiecito.',
+      g: 'Las de tela se lavan y se reusan: menos basura.' },
+    manzanas:   { name: 'Manzanas', tag: '', shape: 'net', c: '#e53935', c2: '#c98a4a', c3: '#5fb04a', cat: 'fru', anim: 'bounce', where: 'Frutero o refri',
+      i: 'Las manzanas crujen y tienen fibra.',
+      g: 'Sueltan un gas que madura más rápido a otras frutas: guárdalas separadas.' },
+    naranjas:   { name: 'Naranjas', tag: '', shape: 'net', c: '#ff9a2e', c2: '#c98a4a', c3: '#4f9a3a', cat: 'fru', anim: 'wobble', where: 'Frutero, lugar fresco',
+      i: 'La naranja tiene vitamina C.',
+      g: 'En gajos te da más fibra que en jugo.' },
+    aguacates:  { name: 'Aguacates', tag: '', shape: 'net', c: '#6fa83a', c2: '#c98a4a', c3: '#3f6b2a', cat: 'fru', anim: 'sway', where: 'Frutero; maduros, al refri',
+      i: 'Con el aguacate se hace guacamole.',
+      g: 'Déjalo madurar afuera; ya maduro, en el refri aguanta unos días más.' },
     gift:       { name: 'Caja sorpresa', tag: '', shape: 'gift', c: '#8a52ec', c2: '#ffcb45', c3: '#ffffff', cat: 'esp', anim: 'bounce', where: '', i: '', g: '' }
   };
-  const ORDER = ['leche', 'agua', 'galletas', 'jugo', 'papitas', 'jabon', 'yogur', 'cereal', 'refresco', 'miel', 'papel', 'catsup', 'helado', 'cafe', 'mostaza', 'detergente', 'avena', 'dulces', 'cacahuate'];
+  const ORDER = ['leche', 'agua', 'galletas', 'jugo', 'papitas', 'jabon', 'manzanas', 'huevo', 'arroz', 'yogur', 'cereal', 'refresco', 'naranjas', 'miel', 'papel', 'frijol', 'queso', 'catsup', 'tostadas', 'helado', 'cafe', 'esponja', 'atun', 'mostaza', 'detergente', 'pastadental', 'avena', 'dulces', 'cacahuate', 'mantequilla', 'te', 'harina', 'aceite', 'cloro', 'mermelada', 'aguacates', 'pasta', 'crema', 'limpiador', 'chocolate', 'refritos', 'sal', 'gelatina', 'mayonesa', 'jamaica', 'azucar', 'chiles', 'mineral', 'servilletas'];
   const CATS = {
     lac: { name: 'Lácteos y fríos', color: '#1b56a6', soft: '#e3eefb' },
     beb: { name: 'Bebidas', color: '#0f6b66', soft: '#dcf3f0' },
     des: { name: 'Despensa', color: '#8a4f00', soft: '#fbefd6' },
     lim: { name: 'Limpieza', color: '#2e6b33', soft: '#e2f2e3' },
+    fru: { name: 'Frutas', color: '#9a3412', soft: '#ffe7d6' },
     esp: { name: 'Especial', color: '#5b2bb5', soft: '#efe5ff' }
   };
   const ZONES = ['Estante', 'Alacena', 'Refrigerador', 'Zona de limpieza', 'Bodega'];
@@ -174,8 +267,10 @@
     const pool = [];
     const giftT = Math.min(P.gifts, Math.max(0, triples - 2));
     for (let g = 0; g < giftT; g++) pool.push('gift', 'gift', 'gift');
-    const eligible = ORDER.slice(0, Math.min(ORDER.length, P.types + 2 + P.tier * 2));
-    const chosen = shuffle(eligible.slice()).slice(0, P.types);
+    // Los productos van rotando: cada nivel saca su selección de un surtido que crece
+    const eligible = ORDER.slice(0, Math.min(ORDER.length, 8 + n + P.tier * 3));
+    const newest = eligible[eligible.length - 1];
+    const chosen = [newest].concat(shuffle(eligible.slice(0, -1)).slice(0, P.types - 1));
     const rest = triples - giftT;
     const kindCount = {};
     for (let i = 0; i < rest; i++) {
