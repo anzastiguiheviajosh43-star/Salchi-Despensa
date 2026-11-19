@@ -204,7 +204,11 @@
     else empties = tier >= 5 ? 3 : 4;
     const frozen = (tier === 2 || tier >= 5) ? (chest ? 2 : 1) : 0;
     const locks = (tier === 3 || tier >= 5) ? (chest ? 2 : 1) : 0;
-    const gifts = tier === 4 ? 2 : (n % 3 === 0 ? 1 : 0);
+    // Cajas sorpresa al azar (cada nivel tiene su suerte fija); en los niveles cofre siempre hay
+    const luck = rngFor(n * 104729 + 7)();
+    let gifts = 0;
+    if (chest) gifts = tier >= 4 ? 2 : 1;
+    else if (n >= 2 && luck < (tier === 4 ? 0.45 : 0.3)) gifts = (tier === 4 && luck < 0.12) ? 2 : 1;
     return { n, tier, inT, chest, rows, cols, depth, types, empties, frozen, locks, gifts };
   }
 

@@ -1,5 +1,5 @@
 /* La Despensa de Salchi — funciona sin internet */
-const CACHE = 'salchi-v2';
+const CACHE = 'salchi-v3';
 const FILES = ['./', 'index.html', 'app.js', 'engine.js', 'manifest.webmanifest',
   'lilita.woff2', 'nunito-700.woff2', 'nunito-800.woff2', 'nunito-900.woff2',
   'icon-180.png', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'];

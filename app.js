@@ -15,7 +15,7 @@
   // ---------- Guardado ----------
   const KEY = 'salchi.save.v1';
   const DEF = { name: '', datos: 'infantil', sound: true, vib: true, level: 1, stars: {}, best: {}, huesitos: 60,
-    boost: { undo: 3, hint: 3, shuffle: 2, slot: 1 }, zoom: 1, found: {}, daily: { last: '', streak: 0, lastPlay: '' }, seen: {}, cur: null };
+    boost: { undo: 3, hint: 3, shuffle: 2, slot: 1 }, zoom: 1, wallet: 0, wardrobe: { owned: {}, worn: {} }, found: {}, daily: { last: '', streak: 0, lastPlay: '' }, seen: {}, cur: null };
   let S = load();
   function load() {
     try {
@@ -23,6 +23,9 @@
       const out = Object.assign(clone(DEF), s);
       out.boost = Object.assign({}, DEF.boost, s.boost || {});
       out.daily = Object.assign({}, DEF.daily, s.daily || {});
+      out.wardrobe = Object.assign({ owned: {}, worn: {} }, s.wardrobe || {});
+      // Quien ya jugaba recibe sus estrellas ganadas en el monedero
+      if (s.wallet == null) out.wallet = Object.keys(out.stars || {}).reduce((a, k) => a + out.stars[k], 0);
       return out;
     } catch (e) { return clone(DEF); }
   }
@@ -95,6 +98,7 @@
     home: `<svg viewBox="0 0 24 24" ${ST}><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>`,
     restart: `<svg viewBox="0 0 24 24" ${ST} stroke-width="2.6"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v5h5"/></svg>`,
     play: `<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.9l10-6.5a1 1 0 0 0 0-1.7l-10-6.5A1 1 0 0 0 8 5.5z"/></svg>`,
+    hanger: `<svg viewBox="0 0 24 24" ${ST}><path d="M12 7.5a2 2 0 1 1 2-2c0 1.2-2 1.6-2 3V10M12 10L3 16.4a1 1 0 0 0 .6 1.8h16.8a1 1 0 0 0 .6-1.8L12 10z"/></svg>`,
     book: `<svg viewBox="0 0 24 24" ${ST}><path d="M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2zM4 20a2 2 0 0 0 2 2h13v-4"/></svg>`,
     shop: `<svg viewBox="0 0 24 24" ${ST}><path d="M4 9l1.5-5h13L20 9M4 9h16v11H4zM4 9c0 1.7 1.3 3 3 3s3-1.3 3-3c0 1.7 1.3 3 2 3s2-1.3 2-3c0 1.7 1.3 3 3 3s3-1.3 3-3"/></svg>`,
     star: (fill) => `<svg viewBox="0 0 24 24"><path d="${STARP}" fill="${fill || '#ffcb45'}" stroke="#8a4a00" stroke-width="1.3" stroke-linejoin="round"/></svg>`,
@@ -161,9 +165,100 @@
     return `<div class="it a-${p.anim} ${cls || ''}" data-c="${c}" data-s="${s}" style="--d:${d}s" role="img" aria-label="${p.name}"><div class="bob">${prodSVG(k)}</div></div>`;
   }
 
+  // ---------- Ropero: prendas de Salchi ----------
+  const starPath = (x, y, r, fill, extra) => {
+    let d = '';
+    for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, rr = i % 2 ? r * 0.45 : r; d += (i ? 'L' : 'M') + (x + Math.cos(a) * rr).toFixed(1) + ' ' + (y + Math.sin(a) * rr).toFixed(1); }
+    return `<path d="${d}Z" fill="${fill}" ${extra || ''}/>`;
+  };
+  const flower = (x, y, c, r) => { r = r || 3; const pts = [[0, -1.2], [1.14, -0.37], [0.7, 0.97], [-0.7, 0.97], [-1.14, -0.37]]; return `<g transform="translate(${x} ${y})">${pts.map(([a, b]) => `<circle cx="${(a * r).toFixed(1)}" cy="${(b * r).toFixed(1)}" r="${r}" fill="${c}"/>`).join('')}<circle r="${(r * 0.72).toFixed(1)}" fill="#ffcb45"/></g>`; };
+  const pearls = () => { let s = ''; for (let x = -22; x <= 22; x += 5.5) { const y = 10 * (1 - (x / 24) * (x / 24)) - 2; s += `<circle cx="${x}" cy="${y.toFixed(1)}" r="2.7" fill="#fff" stroke="#e2d6c6" stroke-width=".8"/>`; } return s + '<circle cx="0" cy="14" r="3.4" fill="#fff" stroke="#e2d6c6" stroke-width=".8"/><circle cx="-1" cy="13" r="1" fill="#fff"/>'; };
+  const beanie = (c, c2, c3) => `<path d="M-23 9 Q-25 -18 0 -20 Q25 -18 23 9 Z" fill="${c}"/><path d="M-12 -14 Q-10 -2 -12 8 M0 -19 V8 M12 -14 Q10 -2 12 8" stroke="${c2}" stroke-width="1.6" opacity=".4" fill="none"/><rect x="-25" y="4" width="50" height="9" rx="4.5" fill="${c2}"/><circle cx="0" cy="-22" r="6.5" fill="${c3}"/>`;
+  const pali = (c) => `<path d="M-23 -1 Q0 12 23 -1 L0 17 Z" fill="${c}"/><circle cx="-8" cy="4" r="1.3" fill="#fff"/><circle cx="6" cy="5" r="1.3" fill="#fff"/><circle cx="0" cy="10" r="1.3" fill="#fff"/><path d="M-23 -1 Q0 12 23 -1" stroke="#fff" stroke-width="1" stroke-dasharray="1.5 2" fill="none" opacity=".8"/>`;
+  const SHOULD = (c, extra) => `<path d="M12 112 Q15 81 50 80 Q85 81 88 112 Z" fill="${c}" ${extra || ''}/>`;
+  const wing = (flip) => `<g ${flip ? 'transform="translate(100 0) scale(-1 1)"' : ''}><path d="M26 72 Q4 52 1 76 Q8 74 9 80 Q2 82 6 91 Q17 85 27 86 Z" fill="#fff" stroke="#cfe3ff" stroke-width="2"/></g>`;
+  // slot: head (cabeza), neck (cuello), face (cara), body (cuerpo). art = dibujo de frente; side = de lado
+  const CLOTHES = [
+    { id: 'gorro_rojo', name: 'Gorro tejido rojo', slot: 'head', price: 10, art: beanie('#e53935', '#b71c1c', '#fff') },
+    { id: 'gorro_morado', name: 'Gorro con pompón', slot: 'head', price: 15, art: beanie('#8a62e6', '#5b2bb5', '#ffcb45') },
+    { id: 'mono_rosa', name: 'Moño rosita', slot: 'head', price: 8, art: '<g transform="translate(14 1) rotate(15)"><path d="M0 0 Q-15 -14 -17 0 Q-15 14 0 0 Z" fill="#ff8fb1"/><path d="M0 0 Q15 -14 17 0 Q15 14 0 0 Z" fill="#ff8fb1"/><circle r="4" fill="#d94f7c"/><path d="M-10 -5 Q-12 0 -10 5 M10 -5 Q12 0 10 5" stroke="#fff" stroke-width="1.4" opacity=".6" fill="none"/></g>' },
+    { id: 'gorra_azul', name: 'Gorra azul', slot: 'head', price: 12, art: '<path d="M-22 8 Q-22 -18 0 -19 Q22 -18 22 8 Z" fill="#3a84e6"/><path d="M0 -19 V7" stroke="#154c99" stroke-width="1.2" opacity=".5"/><ellipse cx="14" cy="8" rx="20" ry="4.5" fill="#154c99"/><circle cx="0" cy="-19" r="2.6" fill="#154c99"/>' + starPath(0, -5, 5, '#ffcb45') },
+    { id: 'paja', name: 'Sombrero de paja', slot: 'head', price: 25, art: '<ellipse cx="0" cy="6" rx="40" ry="9" fill="#e8bf5e"/><path d="M-19 6 Q-20 -22 0 -22 Q20 -22 19 6 Z" fill="#f4d27a"/><rect x="-19.5" y="-3" width="39" height="6" fill="#e05a47"/><path d="M-30 6 Q0 14 30 6" stroke="#c99a3a" stroke-width="1" fill="none"/>' + flower(13, 0, '#ff8fb1', 2.4) },
+    { id: 'chef', name: 'Gorrito de chef', slot: 'head', price: 30, art: '<rect x="-17" y="-8" width="34" height="16" rx="3" fill="#fff" stroke="#dcdce6"/><circle cx="-12" cy="-16" r="11" fill="#fff" stroke="#dcdce6"/><circle cx="12" cy="-16" r="11" fill="#fff" stroke="#dcdce6"/><circle cx="0" cy="-24" r="13" fill="#fff" stroke="#dcdce6"/><rect x="-16" y="-10" width="32" height="7" fill="#fff"/>' },
+    { id: 'diadema', name: 'Diadema de flores', slot: 'head', price: 35, art: '<path d="M-27 10 Q0 -14 27 10" fill="none" stroke="#6fa83a" stroke-width="3" stroke-linecap="round"/>' + flower(-19, 2, '#ff8fb1') + flower(-7, -5, '#fff') + flower(7, -5, '#c9a5ff') + flower(19, 2, '#ff8fb1') },
+    { id: 'audifonos', name: 'Audífonos', slot: 'head', price: 60, art: '<path d="M-30 22 Q-32 -16 0 -18 Q32 -16 30 22" fill="none" stroke="#3a3f4b" stroke-width="5.5" stroke-linecap="round"/><rect x="-38" y="14" width="13" height="20" rx="6" fill="#ff5d8f"/><rect x="25" y="14" width="13" height="20" rx="6" fill="#ff5d8f"/><rect x="-35" y="17" width="4" height="14" rx="2" fill="#fff" opacity=".4"/><rect x="28" y="17" width="4" height="14" rx="2" fill="#fff" opacity=".4"/>' },
+    { id: 'mago', name: 'Sombrero de mago', slot: 'head', price: 150, art: '<path d="M-22 6 L6 -48 L22 6 Z" fill="#5b2bb5"/><path d="M6 -48 Q15 -50 16 -41" stroke="#5b2bb5" stroke-width="4" fill="none" stroke-linecap="round"/><ellipse cx="0" cy="6" rx="32" ry="6.5" fill="#3a1d82"/>' + starPath(-5, -12, 4.5, '#ffcb45') + starPath(7, -28, 3.2, '#fff') + '<circle cx="2" cy="-2" r="4" fill="#ffcb45"/><circle cx="4" cy="-3.5" r="3.6" fill="#5b2bb5"/>' },
+    { id: 'corona', name: 'Corona real', slot: 'head', price: 300, art: '<path d="M-19 6 V-14 L-9.5 -4 L0 -20 L9.5 -4 L19 -14 V6 Z" fill="#ffcb45" stroke="#b37f00" stroke-width="1.5" stroke-linejoin="round"/><rect x="-19" y="0" width="38" height="6" fill="#e0a100"/><circle cx="0" cy="-7" r="3.2" fill="#e53935"/><circle cx="-11" cy="2.8" r="2" fill="#4a93e6"/><circle cx="11" cy="2.8" r="2" fill="#4a93e6"/><circle cx="0" cy="-20" r="2.3" fill="#fff"/><circle cx="-19" cy="-14" r="2" fill="#fff"/><circle cx="19" cy="-14" r="2" fill="#fff"/><path d="M-15 -8 L-13 -2" stroke="#fff" stroke-width="1.5" opacity=".6"/>' },
+    { id: 'charro', name: 'Sombrero de charro', slot: 'head', price: 500, art: '<ellipse cx="0" cy="6" rx="46" ry="10" fill="#2b1a10" stroke="#ffcb45" stroke-width="1.8"/><path d="M-17 6 Q-17 -26 0 -27 Q17 -26 17 6 Z" fill="#3a2416"/><path d="M-16 -2 Q0 4 16 -2" stroke="#ffcb45" stroke-width="2.4" fill="none"/><path d="M-37 8 Q-20 13 -7 10 M37 8 Q20 13 7 10" stroke="#ffcb45" stroke-width="1.4" fill="none" stroke-dasharray="2 2"/><circle cx="-10" cy="-12" r="2" fill="#ffcb45"/><circle cx="10" cy="-12" r="2" fill="#ffcb45"/><circle cx="0" cy="-18" r="2.4" fill="#ffcb45"/>' },
+    { id: 'pali_rojo', name: 'Paliacate rojo', slot: 'neck', price: 5, art: pali('#e53935') },
+    { id: 'pali_azul', name: 'Paliacate azul', slot: 'neck', price: 5, art: pali('#2f6fd6') },
+    { id: 'bufanda', name: 'Bufanda calientita', slot: 'neck', price: 20, art: '<path d="M-25 -4 Q0 8 25 -4 L25 4 Q0 16 -25 4 Z" fill="#62c45a"/><path d="M-14 1 V9 M0 4 V12 M14 1 V9" stroke="#fff" stroke-width="3"/><rect x="9" y="4" width="9" height="18" rx="2" fill="#62c45a"/><rect x="9" y="10" width="9" height="3" fill="#fff"/><path d="M10 22 v3 M13 22 v3 M16 22 v3" stroke="#62c45a" stroke-width="1.4"/>' },
+    { id: 'collar_flores', name: 'Collar de flores', slot: 'neck', price: 40, art: flower(-20, -2, '#ff8fb1', 3.2) + flower(-10, 4, '#ffcb45', 3.2) + flower(0, 7, '#c9a5ff', 3.2) + flower(10, 4, '#8fd3ff', 3.2) + flower(20, -2, '#ff8fb1', 3.2) },
+    { id: 'corbatin', name: 'Corbatín de gala', slot: 'neck', price: 45, art: '<path d="M-14 -2 Q0 6 14 -2" stroke="#fff" stroke-width="3" fill="none"/><path d="M0 5 L-13 -2 L-13 12 Z" fill="#2b1a10"/><path d="M0 5 L13 -2 L13 12 Z" fill="#2b1a10"/><circle cx="0" cy="5" r="3" fill="#4a3426"/>' },
+    { id: 'perlas', name: 'Collar de perlas', slot: 'neck', price: 120, art: pearls() },
+    { id: 'medalla', name: 'Medalla de oro', slot: 'neck', price: 400, art: '<path d="M-16 -3 L-3 14" stroke="#e53935" stroke-width="5"/><path d="M16 -3 L3 14" stroke="#2f6fd6" stroke-width="5"/><circle cx="0" cy="19" r="9" fill="#ffcb45" stroke="#b37f00" stroke-width="1.6"/>' + starPath(0, 19, 5, '#fff3b0') },
+    { id: 'bigote', name: 'Bigotito elegante', slot: 'face', price: 15, art: '<path d="M37 64 Q44 58 50 63 Q56 58 63 64 Q58 67 54 65.5 Q50 63.5 46 65.5 Q42 67 37 64 Z" fill="#2b1a10"/>', side: '<path d="M151 64 Q157 58 164 62 Q160 66 155 65 Z" fill="#2b1a10"/>' },
+    { id: 'lentes', name: 'Lentes redondos', slot: 'face', price: 55, art: '<circle cx="38" cy="44" r="8.5" fill="#bfe6ff" fill-opacity=".35" stroke="#2b1a10" stroke-width="2.4"/><circle cx="62" cy="44" r="8.5" fill="#bfe6ff" fill-opacity=".35" stroke="#2b1a10" stroke-width="2.4"/><path d="M46.5 44 Q50 41 53.5 44" stroke="#2b1a10" stroke-width="2.2" fill="none"/>', side: '<circle cx="143" cy="39" r="7.5" fill="#bfe6ff" fill-opacity=".35" stroke="#2b1a10" stroke-width="2.2"/><path d="M135.5 38 L126 36" stroke="#2b1a10" stroke-width="2"/>' },
+    { id: 'sueter', name: 'Suéter tejido', slot: 'body', price: 30,
+      art: SHOULD('#e53935') + '<path d="M18 93 l5 -4 l5 4 l5 -4 l5 4 l5 -4 l5 4 l5 -4 l5 4 l5 -4 l5 4 l5 -4 l5 4 l5 -4 l4 3" stroke="#fff" stroke-width="2.2" fill="none"/>',
+      side: '<rect x="44" y="45" width="90" height="41" rx="19" fill="#e53935"/><rect x="44" y="77" width="90" height="7" rx="3.5" fill="#b71c1c"/><path d="M54 60 l6 -5 l6 5 l6 -5 l6 5 l6 -5 l6 5 l6 -5 l6 5 l6 -5 l6 5 l6 -5 l6 5" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><circle cx="60" cy="69" r="1.8" fill="#fff"/><circle cx="84" cy="70" r="1.8" fill="#fff"/><circle cx="108" cy="69" r="1.8" fill="#fff"/>' },
+    { id: 'impermeable', name: 'Impermeable amarillo', slot: 'body', price: 35,
+      art: SHOULD('#ffd23f') + '<path d="M38 81 L50 90 L62 81" fill="#f2c12e"/><circle cx="50" cy="95" r="2.2" fill="#c98a00"/><circle cx="50" cy="104" r="2.2" fill="#c98a00"/>',
+      side: '<rect x="40" y="44" width="96" height="42" rx="19" fill="#ffd23f"/><path d="M118 46 Q134 34 140 48 L134 56 Z" fill="#f2c12e"/><circle cx="122" cy="62" r="2.2" fill="#c98a00"/><circle cx="122" cy="72" r="2.2" fill="#c98a00"/><rect x="48" y="79" width="80" height="4" rx="2" fill="#e6b800"/><rect x="50" y="49" width="60" height="5" rx="2.5" fill="#fff" opacity=".35"/>' },
+    { id: 'delantal', name: 'Delantal de cocina', slot: 'body', price: 25,
+      art: '<path d="M38 82 L36 112 H64 L62 82 Z" fill="#fff" stroke="#ff8fb1" stroke-width="1.8"/><rect x="43" y="92" width="14" height="8" rx="2" fill="#ffe0eb"/><path d="M38 82 Q32 76 26 80 M62 82 Q68 76 74 80" stroke="#ff8fb1" stroke-width="2" fill="none"/>',
+      side: '<path d="M86 48 L124 54" stroke="#ff8fb1" stroke-width="2.4"/><path d="M106 56 L134 54 L136 88 L108 90 Z" fill="#fff" stroke="#ff8fb1" stroke-width="1.6"/><rect x="113" y="70" width="14" height="9" rx="2" fill="#ffe0eb"/>' },
+    { id: 'marinero', name: 'Traje de marinero', slot: 'body', price: 50,
+      art: SHOULD('#fff', 'stroke="#d6dbe8"') + '<path d="M30 92 H70 M24 100 H76" stroke="#2f4fa8" stroke-width="3.4"/><path d="M36 81 L50 94 L64 81 Z" fill="#2f4fa8"/><path d="M50 94 l-3 6 l6 0 Z" fill="#e53935"/>',
+      side: '<rect x="44" y="45" width="90" height="41" rx="19" fill="#fff"/><rect x="52" y="55" width="76" height="4" fill="#2f4fa8"/><rect x="48" y="64" width="84" height="4" fill="#2f4fa8"/><rect x="50" y="73" width="80" height="4" fill="#2f4fa8"/><path d="M110 46 L134 50 L124 66 Z" fill="#2f4fa8"/><path d="M124 66 l-3 6 l6 -2 Z" fill="#e53935"/>' },
+    { id: 'tutu', name: 'Tutú de bailarina', slot: 'body', price: 70,
+      art: '<path d="M14 104 Q22 96 30 104 Q38 96 46 104 Q54 96 62 104 Q70 96 78 104 Q86 96 90 104 L92 112 H8 Z" fill="#ff9cc2"/><path d="M36 82 L32 100 M64 82 L68 100" stroke="#ff9cc2" stroke-width="3"/>',
+      side: '<path d="M34 70 Q42 62 50 70 Q58 62 66 70 Q74 62 82 70 L86 84 Q60 94 30 84 Z" fill="#ff9cc2"/><path d="M38 76 Q46 70 54 76 Q62 70 70 76 Q78 70 84 76 L86 86 Q60 94 34 86 Z" fill="#ffc1d9"/>' },
+    { id: 'capa', name: 'Capa de súper perrito', slot: 'body', price: 90,
+      art: '<path d="M14 112 Q8 88 30 79 L36 112 Z" fill="#e53935"/><path d="M86 112 Q92 88 70 79 L64 112 Z" fill="#e53935"/><circle cx="50" cy="83" r="4" fill="#ffcb45" stroke="#b37f00"/>',
+      side: '<path d="M124 52 Q86 40 36 48 Q24 66 32 86 Q46 78 62 84 Q76 74 92 80 Q104 68 122 68 Z" fill="#e53935"/><path d="M124 52 Q86 40 36 48" stroke="#b71c1c" stroke-width="3" fill="none"/><circle cx="76" cy="62" r="9" fill="#ffcb45"/><ellipse cx="76" cy="65" rx="3.6" ry="3" fill="#b71c1c"/><circle cx="71.5" cy="59.5" r="1.7" fill="#b71c1c"/><circle cx="75" cy="57.5" r="1.7" fill="#b71c1c"/><circle cx="78.8" cy="57.5" r="1.7" fill="#b71c1c"/><circle cx="82" cy="59.5" r="1.7" fill="#b71c1c"/>' },
+    { id: 'astronauta', name: 'Traje de astronauta', slot: 'body', price: 600,
+      art: SHOULD('#f4f6fb', 'stroke="#c9cfdc" stroke-width="2"') + '<rect x="58" y="90" width="14" height="10" rx="2" fill="#2f6fd6"/>' + starPath(65, 95, 3, '#fff') + '<circle cx="34" cy="95" r="4" fill="#e53935"/>',
+      side: '<rect x="34" y="34" width="34" height="16" rx="5" fill="#c9cfdc"/><rect x="40" y="44" width="96" height="44" rx="20" fill="#f4f6fb" stroke="#c9cfdc" stroke-width="2"/><rect x="56" y="56" width="18" height="12" rx="2" fill="#2f6fd6"/>' + starPath(65, 62, 3.5, '#fff') + '<circle cx="100" cy="62" r="5" fill="#e53935"/><rect x="48" y="78" width="80" height="4" rx="2" fill="#c9cfdc"/>' },
+    { id: 'capa_rey', name: 'Capa de rey', slot: 'body', price: 750,
+      art: SHOULD('#c2185b') + '<path d="M16 90 Q50 74 84 90 L85 97 Q50 81 15 97 Z" fill="#fff"/><circle cx="30" cy="88" r="1.3" fill="#2b1a10"/><circle cx="50" cy="83" r="1.3" fill="#2b1a10"/><circle cx="70" cy="88" r="1.3" fill="#2b1a10"/><circle cx="50" cy="91" r="3.4" fill="#ffcb45" stroke="#b37f00"/>',
+      side: '<path d="M126 50 Q86 36 30 46 Q18 70 26 96 Q60 86 92 94 Q108 76 124 70 Z" fill="#c2185b"/><path d="M128 50 Q86 36 30 46 L32 54 Q86 44 126 58 Z" fill="#fff"/><circle cx="48" cy="49" r="1.4" fill="#2b1a10"/><circle cx="70" cy="46.5" r="1.4" fill="#2b1a10"/><circle cx="94" cy="47.5" r="1.4" fill="#2b1a10"/><circle cx="114" cy="51" r="1.4" fill="#2b1a10"/><circle cx="124" cy="58" r="4" fill="#ffcb45" stroke="#b37f00"/>' },
+    // Especiales: solo salen en cajas sorpresa
+    { id: 'unicornio', name: 'Gorro de unicornio', slot: 'head', price: 0, special: true, art: '<path d="M-23 9 Q-25 -18 0 -20 Q25 -18 23 9 Z" fill="#fff6fb"/><path d="M-19 -10 L-26 -25 L-11 -16 Z" fill="#ffb3d1"/><path d="M19 -10 L26 -25 L11 -16 Z" fill="#ffb3d1"/><path d="M-5 -18 L0 -45 L5 -18 Z" fill="#ffcb45"/><path d="M-3.6 -25 L3.6 -27.5 M-2.6 -32 L2.6 -34.5" stroke="#e0a100" stroke-width="1.4"/><path d="M16 -16 q10 6 6 20 q7 -5 4 -16 Z" fill="#c9a5ff"/><path d="M12 -18 q13 2 13 15" stroke="#8fd3ff" stroke-width="3" fill="none"/><rect x="-25" y="4" width="50" height="8" rx="4" fill="#ffb3d1"/>' },
+    { id: 'alitas', name: 'Alitas de ángel', slot: 'body', price: 0, special: true,
+      art: wing(false) + wing(true),
+      side: '<path d="M80 48 Q66 12 38 20 Q50 28 46 34 Q32 32 28 42 Q42 44 44 48 Q34 50 34 58 Q56 54 80 52 Z" fill="#fff" stroke="#cfe3ff" stroke-width="2"/><path d="M76 46 Q62 30 46 28" stroke="#cfe3ff" stroke-width="1.5" fill="none"/>' },
+    { id: 'lentes_estrella', name: 'Lentes de estrella', slot: 'face', price: 0, special: true,
+      art: starPath(38, 44, 11, '#ff8fb1', 'fill-opacity=".85" stroke="#ffcb45" stroke-width="1.8" stroke-linejoin="round"') + starPath(62, 44, 11, '#ff8fb1', 'fill-opacity=".85" stroke="#ffcb45" stroke-width="1.8" stroke-linejoin="round"') + '<path d="M47 43 Q50 40 53 43" stroke="#ffcb45" stroke-width="2.2" fill="none"/>',
+      side: starPath(143, 39, 10, '#ff8fb1', 'fill-opacity=".85" stroke="#ffcb45" stroke-width="1.6" stroke-linejoin="round"') + '<path d="M134 38 L126 36" stroke="#ffcb45" stroke-width="2"/>' }
+  ];
+  const CL = {}; CLOTHES.forEach((c) => { CL[c.id] = c; });
+  const SLOTS = { head: 'Cabeza', neck: 'Cuello', face: 'Cara', body: 'Cuerpo' };
+  function rarity(c) {
+    if (c.special) return { t: 'Especial', bg: '#ffe0eb', fg: '#a8355c' };
+    if (c.price <= 20) return { t: 'Básico', bg: '#e2f2e3', fg: '#2e6b33' };
+    if (c.price <= 60) return { t: 'Bonito', bg: '#e3eefb', fg: '#1b56a6' };
+    if (c.price <= 200) return { t: 'Cool', bg: '#efe5ff', fg: '#5b2bb5' };
+    return { t: 'Legendario', bg: '#ffcb45', fg: '#5a3300' };
+  }
+  const outfitOf = (o) => o || (S.wardrobe && S.wardrobe.worn) || {};
+  function wearFront(o, slot) {
+    const c = o[slot] && CL[o[slot]]; if (!c) return '';
+    if (slot === 'head') return `<g transform="translate(50 20)">${c.art}</g>`;
+    if (slot === 'neck') return `<g transform="translate(50 84)">${c.art}</g>`;
+    return c.art;
+  }
+  function wearSide(o, slot) {
+    const c = o[slot] && CL[o[slot]]; if (!c) return '';
+    if (slot === 'head') return `<g transform="translate(139 26) rotate(12) scale(.78)">${c.art}</g>`;
+    if (slot === 'neck') return `<g transform="translate(126 64) rotate(-28) scale(.62)">${c.art}</g>`;
+    return c.side || '';
+  }
+
   // ---------- Salchi ----------
-  function salchiBody() {
-    return `<svg viewBox="0 0 172 114" aria-hidden="true">
+  function salchiBody(o) {
+    o = outfitOf(o);
+    return `<svg viewBox="${o.head ? '-4 -34 182 148' : '0 0 172 114'}" aria-hidden="true">
       <ellipse cx="86" cy="106" rx="64" ry="5" fill="#000" opacity=".18"/>
       <path class="tail" d="M30 54 Q13 42 17 25" fill="none" stroke="#9a4f1d" stroke-width="6.5" stroke-linecap="round"/>
       <rect x="38" y="80" width="12" height="22" rx="6" fill="#8a4318"/><rect x="54" y="80" width="12" height="22" rx="6" fill="#9a4f1d"/>
@@ -172,6 +267,7 @@
       <rect x="26" y="47" width="113" height="41" rx="20.5" fill="#b8642a"/>
       <path d="M44 82 Q86 94 127 82" fill="none" stroke="#e8ad6e" stroke-width="6" stroke-linecap="round"/>
       <rect x="36" y="51" width="78" height="6" rx="3" fill="#fff" opacity=".2"/>
+      ${wearSide(o, 'body')}
       <ellipse cx="139" cy="45" rx="23" ry="21" fill="#b8642a"/>
       <ellipse cx="156" cy="56" rx="15.5" ry="10.5" fill="#e8ad6e"/>
       <ellipse cx="166.5" cy="51.5" rx="5.2" ry="4.4" fill="#2b1a10"/><circle cx="165" cy="50" r="1.4" fill="#fff" opacity=".7"/>
@@ -181,31 +277,34 @@
       <circle cx="141" cy="31" r="2.7" fill="#e8ad6e"/>
       <circle cx="150" cy="53" r="4.2" fill="#ff8fa3" opacity=".55"/>
       <path d="M125 31 Q112 35 116 60 Q120 72 131 64 Q133 45 129 33 Z" fill="#7a3a12"/>
-      <path d="M114 58 Q122 72 139 65" fill="none" stroke="#ff8fb1" stroke-width="7.5" stroke-linecap="round"/>
-      <circle cx="127" cy="72" r="4.6" fill="#ffcb45" stroke="#b37f00" stroke-width="1"/>
+      ${o.neck ? wearSide(o, 'neck') : '<path d="M114 58 Q122 72 139 65" fill="none" stroke="#ff8fb1" stroke-width="7.5" stroke-linecap="round"/><circle cx="127" cy="72" r="4.6" fill="#ffcb45" stroke="#b37f00" stroke-width="1"/>'}
+      ${wearSide(o, 'face')}${wearSide(o, 'head')}
     </svg>`;
   }
-  function salchiFace(mood, paws) {
+  function salchiFace(mood, paws, o) {
+    o = outfitOf(o);
     let eyes = '<g class="s-eyes"><circle cx="38" cy="44" r="5.2" fill="#2b1a10"/><circle cx="39.7" cy="42.3" r="1.7" fill="#fff"/><circle cx="62" cy="44" r="5.2" fill="#2b1a10"/><circle cx="63.7" cy="42.3" r="1.7" fill="#fff"/></g>';
     let mouth = '<path d="M43 66 Q50 72 57 66" fill="none" stroke="#2b1a10" stroke-width="2.3" stroke-linecap="round"/><path d="M46.5 69 Q50 78 53.5 69 Z" fill="#ff7d9b"/>';
     let extra = '';
     if (mood === 'joy') {
       eyes = '<path d="M32.5 46 Q38 39 43.5 46 M56.5 46 Q62 39 67.5 46" fill="none" stroke="#2b1a10" stroke-width="3.6" stroke-linecap="round"/>';
       mouth = '<path d="M41 65 Q50 79 59 65 Z" fill="#2b1a10"/><path d="M45.5 71 Q50 79 54.5 71 Z" fill="#ff7d9b"/>';
-      extra = '<g transform="translate(76 6) scale(.75)"><path d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.2 4.5 6.8 4.5c2.1 0 3.6 1.2 5.2 3 1.6-1.8 3.1-3 5.2-3 3.6 0 5.8 3.6 4.3 7.2C19.5 16.4 12 21 12 21z" fill="#ff7d9b"/></g>';
+      extra = '<g transform="translate(78 4) scale(.7)"><path d="M12 21s-7.5-4.6-9.5-9.3C1 8.1 3.2 4.5 6.8 4.5c2.1 0 3.6 1.2 5.2 3 1.6-1.8 3.1-3 5.2-3 3.6 0 5.8 3.6 4.3 7.2C19.5 16.4 12 21 12 21z" fill="#ff7d9b"/></g>';
     } else if (mood === 'sad') {
       eyes = '<circle cx="38" cy="46" r="4.6" fill="#2b1a10"/><circle cx="62" cy="46" r="4.6" fill="#2b1a10"/><path d="M31 38 L43 41 M69 38 L57 41" stroke="#7a3a12" stroke-width="3" stroke-linecap="round"/>';
       mouth = '<path d="M44 70 Q50 65 56 70" fill="none" stroke="#2b1a10" stroke-width="2.3" stroke-linecap="round"/>';
     } else if (mood === 'sleep') {
       eyes = '<path d="M33 45 Q38 48 43 45 M57 45 Q62 48 67 45" fill="none" stroke="#2b1a10" stroke-width="3" stroke-linecap="round"/>';
       mouth = '<path d="M47 68 Q50 70 53 68" fill="none" stroke="#2b1a10" stroke-width="2" stroke-linecap="round"/>';
-      extra = '<text x="80" y="22" font-family="Lilita,sans-serif" font-size="16" fill="#fff" stroke="#4f2ca3" stroke-width="3" paint-order="stroke">z</text><text x="90" y="10" font-family="Lilita,sans-serif" font-size="12" fill="#fff" stroke="#4f2ca3" stroke-width="3" paint-order="stroke">z</text>';
+      extra = '<text x="82" y="22" font-family="Lilita,sans-serif" font-size="16" fill="#fff" stroke="#4f2ca3" stroke-width="3" paint-order="stroke">z</text><text x="92" y="10" font-family="Lilita,sans-serif" font-size="12" fill="#fff" stroke="#4f2ca3" stroke-width="3" paint-order="stroke">z</text>';
     }
     const pw = paws ? '<ellipse cx="34" cy="104" rx="10" ry="7" fill="#b8642a"/><ellipse cx="66" cy="104" rx="10" ry="7" fill="#b8642a"/><path d="M30 106v3M34 106v3M38 106v3M62 106v3M66 106v3M70 106v3" stroke="#7a3a12" stroke-width="1.4" stroke-linecap="round"/>' : '';
-    return `<svg viewBox="0 0 100 ${paws ? 112 : 100}" aria-hidden="true">
+    const hasHat = !!o.head;
+    return `<svg viewBox="${hasHat ? '-6 -30 112' : '0 0 100'} ${paws ? (hasHat ? 142 : 112) : (hasHat ? 130 : 100)}" aria-hidden="true">
       <ellipse cx="22" cy="55" rx="12" ry="25" fill="#7a3a12" transform="rotate(12 22 55)"/>
       <ellipse cx="78" cy="55" rx="12" ry="25" fill="#7a3a12" transform="rotate(-12 78 55)"/>
-      <path d="M28 84 Q50 98 72 84 L50 100 Z" fill="#ff8fb1"/>
+      ${wearFront(o, 'body')}
+      ${o.neck ? '' : '<path d="M28 84 Q50 98 72 84 L50 100 Z" fill="#ff8fb1"/>'}
       <ellipse cx="50" cy="48" rx="29" ry="30" fill="#b8642a"/>
       <ellipse cx="50" cy="66" rx="18" ry="14" fill="#e8ad6e"/>
       <circle cx="37" cy="33" r="3.3" fill="#e8ad6e"/><circle cx="63" cy="33" r="3.3" fill="#e8ad6e"/>
@@ -213,7 +312,7 @@
       <ellipse cx="50" cy="58" rx="7" ry="5" fill="#2b1a10"/><ellipse cx="48" cy="56.5" rx="2" ry="1.2" fill="#fff" opacity=".6"/>
       ${mouth}
       <circle cx="31" cy="58" r="4.6" fill="#ff8fa3" opacity=".55"/><circle cx="69" cy="58" r="4.6" fill="#ff8fa3" opacity=".55"/>
-      ${pw}${extra}
+      ${wearFront(o, 'neck')}${wearFront(o, 'face')}${pw}${wearFront(o, 'head')}${extra}
     </svg>`;
   }
   const LIGHTS = (() => {
@@ -290,7 +389,7 @@
     endGame();
     closeModal();
     screen = name;
-    ({ onb: renderOnb, home: renderHome, game: startGame, map: renderMap, col: renderCol })[name](arg);
+    ({ onb: renderOnb, home: renderHome, game: startGame, map: renderMap, col: renderCol, ropero: renderRopero })[name](arg);
   }
   const ACTS = {};
   app.addEventListener('click', (e) => {
@@ -340,11 +439,12 @@
     const found = Object.keys(S.found).length, totalK = E.ORDER.length;
     const ready = S.daily.last !== today();
     const nm = NAME();
-    const greet = pick([`¡Hola, ${nm}! ¿Acomodamos la despensa?`, `¡Guau, ${nm}! Te estaba esperando.`, `${nm}, hoy huele a galletitas.`, `¡Vamos por el nivel ${n}, ${nm}!`, `${nm}, ¿me ayudas a ordenar?`]);
+    const afford = CLOTHES.filter((c) => !c.special && !S.wardrobe.owned[c.id] && c.price <= S.wallet).sort((a, b) => b.price - a.price)[0];
+    const greet = afford && Math.random() < 0.6 ? `¡${nm}, ya te alcanza para ${esc(afford.name.toLowerCase())}! ¿Me lo compras?` : pick([`¡Hola, ${nm}! ¿Acomodamos la despensa?`, `¡Guau, ${nm}! Te estaba esperando.`, `${nm}, hoy huele a galletitas.`, `¡Vamos por el nivel ${n}, ${nm}!`, `${nm}, ¿me ayudas a ordenar?`, `${nm}, ¿cómo me veo? Tócame para cambiarme de ropa.`]);
     const shelfRows = [['leche', 'agua', 'galletas'], ['yogur', 'papitas', 'jabon']];
     const mini = shelfRows.map((r, ri) => `<div class="srow">${r.map((k, ci) => `<div class="cub" style="--cubh:66px;--ih:48px;--iw:34px"><span class="lampglow"></span><span class="lamp"></span><div class="front">${[0, 1, 2].map((s) => `<div class="slot">${itemHTML(k, ri * 3 + ci, s)}</div>`).join('')}</div></div>`).join('')}</div><div class="plank"></div>`).join('');
     app.innerHTML = `<div class="screen home">
-      <div class="topbar">${pillBones()}<span class="pill"><span class="ic">${I.star()}</span>${totalStars()}</span><span class="sp"></span><button class="ibtn" data-act="settings" aria-label="Ajustes">${I.gear}</button></div>
+      <div class="topbar">${pillBones()}<button class="pill" data-act="ropero" aria-label="Estrellas para gastar en el ropero" style="border:0"><span class="ic">${I.star()}</span>${fmt(S.wallet)}</button><span class="sp"></span><button class="ibtn" data-act="settings" aria-label="Ajustes">${I.gear}</button></div>
       <div class="logo"><div class="l1 lil ol">LA DESPENSA</div><div class="l2 lil ol">de Salchi</div></div>
       <div class="mini-shelf"><div class="lights" style="right:14px">${LIGHTS}</div>${mini}</div>
       <div class="widgets">
@@ -353,17 +453,19 @@
         <div class="wcard">${I.flame.replace('<svg', '<svg class="w-ic"')}<span class="t">Racha</span><span class="v">${S.daily.streak} ${S.daily.streak === 1 ? 'día' : 'días'}</span></div>
       </div>
       <div class="home-bottom">
-        <div class="hb-row"><div class="salchi-wrap floaty">${salchiBody()}</div><div class="bubble">${greet}</div></div>
+        <div class="hb-row"><button class="salchi-wrap floaty" data-act="ropero" aria-label="Ropero de Salchi" style="border:0;background:none;padding:0">${salchiBody()}</button><div class="bubble">${greet}</div></div>
         <button class="btn green big" data-act="play"><span class="lil ol" style="--sc:#1b5e1a">JUGAR</span><small>Nivel ${n} · ${esc(z.name)}${n % 10 === 0 ? ' · Cofre' : ''}</small></button>
         <div class="hb-links">
           <button class="btn cream sm" data-act="map">${I.map}Camino</button>
           <button class="btn cream sm" data-act="col">${I.book}Colección</button>
           <button class="btn cream sm" data-act="shop">${I.shop}Tienda</button>
+          <button class="btn cream sm" data-act="ropero">${I.hanger}Ropero</button>
         </div>
       </div>
     </div>`;
   }
   ACTS.play = () => go('game', S.level);
+  ACTS.ropero = () => go('ropero');
   ACTS.map = () => go('map');
   ACTS.col = () => go('col');
   ACTS.home = () => go('home');
@@ -857,10 +959,8 @@
 
   function discover(kind) {
     if (kind === 'gift') {
-      const bk = pick(['undo', 'hint', 'shuffle', 'slot', 'bones']);
-      if (bk === 'bones') { S.huesitos += 15; toast('¡Caja sorpresa!', '+15 huesitos para tu tiendita.', { pic: I.gift, ms: 3500 }); }
-      else { S.boost[bk]++; toast('¡Caja sorpresa!', `+1 ${BNAME[bk]}. ¡Qué suerte, ${NAME()}!`, { pic: I.gift, ms: 3500 }); }
-      SFX.coin(); save(); refreshBones(); return;
+      giftReward();
+      return;
     }
     const p = CAT[kind];
     const dato = S.datos === 'general' ? p.g : p.i;
@@ -871,6 +971,32 @@
     }
     tipCount++;
     if (tipCount % 4 === 0) toast(`${p.name} · ${E.CATS[p.cat].name}`, `Se guarda en: ${p.where}.`, { pic: `<div class="it" style="--iw:34px;--ih:48px"><div class="bob">${prodSVG(kind)}</div></div>`, ms: 3500 });
+  }
+
+  // ---------- Premio de la caja sorpresa ----------
+  function giftReward() {
+    const specials = CLOTHES.filter((c) => c.special && !S.wardrobe.owned[c.id]);
+    const r = Math.random();
+    if (specials.length && r < 0.07) {
+      const c = pick(specials);
+      S.wardrobe.owned[c.id] = true; save();
+      SFX.win();
+      toast('¡¡Prenda ESPECIAL!!', `${c.name} para Salchi. Póntela en el ropero.`, { pic: salchiFace('joy', false, { [c.slot]: c.id }), ms: 6000 });
+      if (G) G.giftLog = (G.giftLog || []).concat([{ special: c.id }]);
+      return;
+    }
+    const both = Math.random() < 0.12;
+    let bones = 0, stars = 0;
+    if (r < 0.52 || both) bones = 15 + Math.floor(Math.random() * 26);
+    if (r >= 0.52 || both) stars = 1 + Math.floor(Math.random() * 3);
+    S.huesitos += bones; S.wallet += stars; save();
+    refreshBones();
+    SFX.coin();
+    const parts = [];
+    if (bones) parts.push(`+${bones} huesitos`);
+    if (stars) parts.push(`+${stars} ${stars === 1 ? 'estrella' : 'estrellas'} para el ropero`);
+    toast(both ? '¡Caja sorpresa DOBLE!' : '¡Caja sorpresa!', parts.join(' y ') + '.', { pic: I.gift, ms: 3800 });
+    if (G) G.giftLog = (G.giftLog || []).concat([{ bones, stars }]);
   }
 
   // ---------- Ayudas ----------
@@ -995,6 +1121,8 @@
     const bones = 10 + f.stars * 5 + (chest ? 50 : 0) + G.giftOpened * 10;
     const prevBest = S.best[n] || 0;
     S.huesitos += bones;
+    const newStars = Math.max(0, f.stars - (S.stars[n] || 0));
+    S.wallet += newStars;
     S.stars[n] = Math.max(S.stars[n] || 0, f.stars);
     S.best[n] = Math.max(prevBest, f.total);
     if (chest) ['undo', 'hint', 'shuffle', 'slot'].forEach((k) => S.boost[k]++);
@@ -1017,7 +1145,7 @@
         ${f.metas.map((x) => `<div class="mrow"><span class="ck ${x.done ? 'y' : ''}">${x.done ? I.check : ''}</span><span>${esc(x.text)}</span><b>${x.done ? '+' + x.bonusPts : ''}</b></div>`).join('')}
       </div>
       ${newOnes.length ? `<div class="newfound"><div class="pic">${itemHTML(newOnes[0], 0, 0, 'a-' + CAT[newOnes[0]].anim)}</div><div style="display:flex;flex-direction:column;gap:3px"><span class="chip" style="align-self:flex-start;background:#8a52ec;color:#fff">NUEVO EN TU COLECCIÓN</span><b class="lil" style="font-size:18px">${CAT[newOnes[0]].name}${newOnes.length > 1 ? ' y más' : ''}</b><span style="font:800 12.5px/1.35 Nunito">${esc(S.datos === 'general' ? CAT[newOnes[0]].g : CAT[newOnes[0]].i)}</span></div></div>` : ''}
-      <div class="rewards"><div>${I.bone}+${bones} huesitos</div>${chest ? `<div>${I.chest}+1 de cada ayuda</div>` : `<div>${I.star()}${f.stars} ${f.stars === 1 ? 'estrella' : 'estrellas'}</div>`}</div>
+      <div class="rewards"><div>${I.bone}+${bones} huesitos</div><div>${I.star()}${newStars ? '+' + newStars + ' al ropero' : 'Ya las tenías'}</div></div>${chest ? `<div class="rewards"><div>${I.chest}Cofre: +1 de cada ayuda</div></div>` : ''}
       <button class="btn green big" data-act="next"><span class="lil ol" style="--sc:#1b5e1a">SIGUIENTE</span><small>Nivel ${n + 1}</small></button>
       <div class="row"><button class="btn purple sm" data-act="map">${I.map}Camino</button><button class="btn purple sm" data-act="home">${I.home}Inicio</button></div>
     </div>`, 'win');
@@ -1078,6 +1206,71 @@
   }
 
   // =====================================================================
+  //  ROPERO
+  // =====================================================================
+  let ropTab = 'head';
+  function clothCard(c) {
+    const own = !!S.wardrobe.owned[c.id], worn = S.wardrobe.worn[c.slot] === c.id, rr = rarity(c);
+    const thumb = c.slot === 'body' ? salchiBody({ body: c.id }) : salchiFace('happy', false, { [c.slot]: c.id });
+    let foot;
+    if (worn) foot = `<span class="cfoot on">${I.check}Puesto</span>`;
+    else if (own) foot = '<span class="cfoot own">Ponérselo</span>';
+    else if (c.special) foot = `<span class="cfoot spc">${I.gift}En regalos</span>`;
+    else if (S.wallet >= c.price) foot = `<span class="cfoot buy">${I.star()}${fmt(c.price)}</span>`;
+    else foot = `<span class="cfoot lock">${I.star('#cdbba6')}${fmt(c.price)}</span>`;
+    const mystery = c.special && !own;
+    return `<button class="ccard ${worn ? 'worn' : ''} ${rr.t === 'Legendario' ? 'legend' : ''}" data-act="cloth" data-id="${c.id}" aria-label="${mystery ? 'Prenda especial secreta' : esc(c.name)}"><div class="cpic ${c.slot === 'body' ? 'wide' : ''} ${mystery ? 'mystery' : ''}">${thumb}</div><span class="cn">${mystery ? '¿?' : esc(c.name)}</span><span class="chip" style="background:${rr.bg};color:${rr.fg}">${rr.t}</span>${foot}</button>`;
+  }
+  function renderRopero() {
+    const prev = $('.ropero .scroll');
+    const keep = prev && screen === 'ropero' ? prev.scrollTop : 0;
+    const tabs = [['head', 'Cabeza'], ['neck', 'Cuello'], ['face', 'Cara'], ['body', 'Cuerpo'], ['special', 'Especiales']];
+    const list = CLOTHES.filter((c) => ropTab === 'special' ? c.special : (!c.special && c.slot === ropTab)).sort((a, b) => a.price - b.price);
+    const owned = CLOTHES.filter((c) => S.wardrobe.owned[c.id]).length;
+    app.innerHTML = `<div class="screen ropero">
+      <div class="shead"><button class="ibtn" data-act="home" aria-label="Volver" style="background:#8a62e6">${I.back}</button><div style="flex:1"><h1>Ropero</h1><small>${owned} de ${CLOTHES.length} prendas · estrellas para gastar</small></div><span class="pill"><span class="ic">${I.star()}</span>${fmt(S.wallet)}</span></div>
+      <div class="stagecard"><span class="rug"></span><div class="rsalchi floaty">${salchiBody()}</div>${Object.keys(S.wardrobe.worn).length ? `<button class="btn cream sm rquit" data-act="undress">Quitar todo</button>` : ''}</div>
+      <div class="tabs" role="tablist">${tabs.map(([k, t]) => `<button role="tab" aria-selected="${ropTab === k}" data-act="rtab" data-k="${k}">${t}</button>`).join('')}</div>
+      <div class="scroll"><div class="grid">${list.map(clothCard).join('')}</div>
+      ${ropTab === 'special' ? `<p class="rnote">Estas no se compran: salen muy de vez en cuando dentro de las cajas sorpresa.</p>` : `<p class="rnote">Ganas estrellas al completar niveles (y al mejorar tu récord) y en algunas cajas sorpresa.</p>`}</div>
+    </div>`;
+    const sc = $('.ropero .scroll'); if (sc && keep) sc.scrollTop = keep;
+  }
+  ACTS.rtab = (b) => { ropTab = b.dataset.k; const sc = $('.ropero .scroll'); if (sc) sc.scrollTop = 0; screen = 'x'; renderRopero(); screen = 'ropero'; };
+  ACTS.undress = () => { S.wardrobe.worn = {}; save(); renderRopero(); };
+  ACTS.cloth = (b) => {
+    const c = CL[b.dataset.id], w = S.wardrobe.worn;
+    if (S.wardrobe.owned[c.id]) {
+      if (w[c.slot] === c.id) delete w[c.slot]; else { w[c.slot] = c.id; SFX.woof(); }
+      save(); renderRopero(); return;
+    }
+    if (c.special) { toast('Prenda especial secreta', 'Solo sale, muy de vez en cuando, dentro de las cajas sorpresa. ¡Suerte!', { pic: I.gift }); return; }
+    const rr = rarity(c);
+    const preview = Object.assign({}, w, { [c.slot]: c.id });
+    const can = S.wallet >= c.price;
+    const pct = Math.min(100, S.wallet / c.price * 100);
+    modal(`<div class="sheet">
+      <button class="close" data-act="close" aria-label="Cerrar">${I.close}</button>
+      <div class="floaty" style="width:240px;margin:6px auto 0">${salchiBody(preview)}</div>
+      <span class="chip" style="align-self:center;background:${rr.bg};color:${rr.fg};font-size:12px">${rr.t}</span>
+      <h2>${esc(c.name)}</h2>
+      ${can ? `<p>¿Se lo compras a Salchi por <b style="color:#4f2ca3">${fmt(c.price)} estrellas</b>? Te quedarían ${fmt(S.wallet - c.price)}.</p>
+      <button class="btn gold" data-act="buycloth" data-id="${c.id}" style="min-height:58px;font-size:22px">${I.star()}Comprar · ${fmt(c.price)}</button>`
+      : `<p>Te faltan <b style="color:#4f2ca3">${fmt(c.price - S.wallet)} estrellas</b>. ¡Sigue jugando, ${NAME()}!</p>
+      <div class="bar big"><i style="width:${pct.toFixed(1)}%"></i><b>${fmt(S.wallet)} / ${fmt(c.price)}</b></div>`}
+    </div>`);
+  };
+  ACTS.buycloth = (b) => {
+    const c = CL[b.dataset.id];
+    if (!c || S.wallet < c.price) return;
+    S.wallet -= c.price; S.wardrobe.owned[c.id] = true; S.wardrobe.worn[c.slot] = c.id; save();
+    closeModal(); renderRopero();
+    SFX.win(); SFX.woof();
+    const r = $('.rsalchi').getBoundingClientRect(); burst(r.left + r.width / 2, r.top + r.height / 2, 26, ['s', 'h', 'c']);
+    toast(`¡${esc(c.name)}!`, `Salchi está feliz con su ropa nueva. ¡Gracias, ${NAME()}!`, { mood: 'joy' });
+  };
+
+  // =====================================================================
   //  COLECCIÓN
   // =====================================================================
   function renderCol() {
@@ -1108,5 +1301,5 @@
   // ---------- Arranque ----------
   document.addEventListener('visibilitychange', () => { if (document.hidden && G) persist(); });
   if (!S.name) go('onb'); else go('home');
-  window.__salchi = { get G() { return G; }, get S() { return S; }, E };
+  window.__salchi = { get G() { return G; }, get S() { return S; }, E, salchiBody, salchiFace, CLOTHES };
 })();
